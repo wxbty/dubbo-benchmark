@@ -56,6 +56,7 @@
         <module>dubbo-triple-client</module>
         <module>dubbo-metrics-client</module>
         <module>dubbo-metrics-server</module>
+        <module>dubbo-continues-testing</module>
 
     </modules>
 
