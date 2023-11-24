@@ -15,6 +15,7 @@ import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.ChainedOptionsBuilder;
 import org.openjdk.jmh.runner.options.Options;
@@ -119,7 +120,8 @@ public class Client extends AbstractClient {
     private static ChainedOptionsBuilder doOptions(ChainedOptionsBuilder optBuilder) {
         String output = System.getProperty("benchmark.output");
         if (output != null && !output.trim().isEmpty()) {
-            optBuilder.output(output);
+            optBuilder.result(output);
+            optBuilder.resultFormat(ResultFormatType.JSON);
         }
         return optBuilder;
     }
