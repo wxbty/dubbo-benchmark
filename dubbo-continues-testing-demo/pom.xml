@@ -1,0 +1,33 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.apache.dubbo</groupId>
+        <artifactId>dubbo-benchmark</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>dubbo-continues-testing-demo</artifactId>
+    <name>Archetype - dubbo-continues-testing-demo</name>
+    <url>http://maven.apache.org</url>
+
+
+    <dependencies>
+        <dependency>
+            <artifactId>jmh_demo</artifactId>
+            <groupId>site.zfei</groupId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+            <dependency>
+                <groupId>org.openjdk.jmh</groupId>
+                <artifactId>jmh-core</artifactId>
+                <version>1.21</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.openjdk.jmh</groupId>
+                <artifactId>jmh-generator-annprocess</artifactId>
+                <version>1.21</version>
+            </dependency>
+    </dependencies>
+</project>
