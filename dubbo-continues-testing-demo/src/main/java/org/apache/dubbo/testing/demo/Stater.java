@@ -8,6 +8,12 @@ import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.results.format.ResultFormatType;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.options.ChainedOptionsBuilder;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.TimeValue;
 import site.zfei.demo.Client;
 
 import java.util.concurrent.TimeUnit;
@@ -26,7 +32,28 @@ public class Stater {
         System.out.println(commitId);
     }
 
-    public static void main(String[] args) {
-        System.out.println(11111);
+    public static void main(String[] args) throws Exception {
+        System.out.println(args);
+
+        Options opt;
+        ChainedOptionsBuilder optBuilder = new OptionsBuilder()
+                .include(Stater.class.getSimpleName())
+                .warmupIterations(1)
+                .warmupTime(TimeValue.seconds(1))
+                .measurementIterations(1)
+                .measurementTime(TimeValue.seconds(1))
+                .threads(2)
+                .forks(1);
+
+        opt = doOptions(optBuilder).build();
+
+        new Runner(opt).run();
+
+    }
+
+    private static ChainedOptionsBuilder doOptions(ChainedOptionsBuilder optBuilder) {
+        optBuilder.result("output.json");
+        optBuilder.resultFormat(ResultFormatType.JSON);
+        return optBuilder;
     }
 }
