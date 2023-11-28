@@ -18,18 +18,17 @@ import site.zfei.demo.Client;
 
 import java.util.concurrent.TimeUnit;
 
+@BenchmarkMode({Mode.Throughput, Mode.AverageTime, Mode.SampleTime})
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
 @State(Scope.Benchmark)
 public class Stater {
 
-    @Param({"param1", "param2"})
+    @Param({"currentCommitId"})
     private String commitId;
 
     @Benchmark
-    @BenchmarkMode({Mode.Throughput, Mode.AverageTime, Mode.SampleTime})
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     public void test() {
         new Client().addByMap();
-        System.out.println(commitId);
     }
 
     public static void main(String[] args) throws Exception {
@@ -52,7 +51,8 @@ public class Stater {
     }
 
     private static ChainedOptionsBuilder doOptions(ChainedOptionsBuilder optBuilder) {
-        optBuilder.result("output.json");
+        String userDir = System.getProperty("user.dir");
+        optBuilder.result(userDir + "/data/output.json");
         optBuilder.resultFormat(ResultFormatType.JSON);
         return optBuilder;
     }
