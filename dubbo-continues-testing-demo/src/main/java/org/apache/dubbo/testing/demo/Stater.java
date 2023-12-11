@@ -18,7 +18,8 @@ import site.zfei.demo.Client;
 
 import java.util.concurrent.TimeUnit;
 
-@BenchmarkMode({Mode.Throughput, Mode.AverageTime, Mode.SampleTime})
+//@BenchmarkMode({Mode.Throughput, Mode.AverageTime, Mode.SampleTime})
+@BenchmarkMode({Mode.AverageTime})
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @State(Scope.Benchmark)
 public class Stater {

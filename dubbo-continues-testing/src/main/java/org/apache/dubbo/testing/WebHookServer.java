@@ -78,7 +78,7 @@ public class WebHookServer {
                 System.out.println("Script Path: " + scriptPath);
 
                 System.out.println("User Dir: " + userDir);
-                ProcessBuilder processBuilder = new ProcessBuilder(scriptPath, userDir, version);
+                ProcessBuilder processBuilder = new ProcessBuilder("sudo", "sh", scriptPath, userDir, version);
                 Process process;
                 try {
                     process = processBuilder.start();
@@ -107,8 +107,11 @@ public class WebHookServer {
 
                     while (process.isAlive() && (lineStr = br.readLine()) != null) {
                         result.append(lineStr);
+                        result.append("\n");
                     }
-                    System.out.println("==============================" + result);
+                    System.out.println("============result begin============");
+                    System.out.println(result);
+                    System.out.println("============result end============");
                 } finally {
                     // 关闭输入流
                     br.close();
