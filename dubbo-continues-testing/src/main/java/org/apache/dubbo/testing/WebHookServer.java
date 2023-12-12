@@ -80,7 +80,7 @@ public class WebHookServer {
                 System.out.println("Script Path: " + scriptPath);
 
                 System.out.println("User Dir: " + userDir);
-                ProcessBuilder processBuilder = new ProcessBuilder("sudo", "sh", scriptPath, userDir, version);
+                ProcessBuilder processBuilder = new ProcessBuilder(scriptPath, userDir, version);
                 Process process;
                 try {
                     process = processBuilder.start();
@@ -96,7 +96,7 @@ public class WebHookServer {
 //                    System.out.println("error:" + lineStr);
 //                }
 
-                StringBuilder result = new StringBuilder();
+//                StringBuilder result = new StringBuilder();
                 BufferedInputStream in = null;
                 BufferedReader br = null;
 
@@ -106,14 +106,13 @@ public class WebHookServer {
                     // 字符流转换字节流
                     br = new BufferedReader(new InputStreamReader(in));
                     // 这里也可以输出文本日志
-
-                    while (process.isAlive() && (lineStr = br.readLine()) != null) {
-                        result.append(lineStr);
-                        System.out.println(lineStr);
-                        result.append("\n");
-                    }
                     System.out.println("============result begin============");
-                    System.out.println(result);
+                    while (process.isAlive() && (lineStr = br.readLine()) != null) {
+//                        result.append(lineStr);
+                        System.out.println(lineStr);
+//                        result.append("\n");
+                    }
+//                    System.out.println(result);
                     System.out.println("============result end============");
                 } finally {
                     // 关闭输入流
@@ -128,6 +127,8 @@ public class WebHookServer {
                     throw new RuntimeException(e);
                 }
             }
+
+            System.out.println("process end");
 
             File outputFile = new File(userDir + "/dubbo-continues-testing-demo/data/output.json");
             // transfer file to Json

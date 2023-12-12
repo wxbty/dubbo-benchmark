@@ -88,7 +88,7 @@ public class Client extends AbstractClient {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println(args);
+        System.out.println("begin dubbo client");
         org.apache.commons.cli.Options options = new org.apache.commons.cli.Options();
 
         options.addOption(Option.builder().longOpt("warmupIterations").hasArg().build());
@@ -119,13 +119,16 @@ public class Client extends AbstractClient {
 
         opt = doOptions(optBuilder).build();
 
+        System.out.println("before run");
         new Runner(opt).run();
+        System.out.println("after run");
 
     }
 
     private static ChainedOptionsBuilder doOptions(ChainedOptionsBuilder optBuilder) {
         String userDir = System.getProperty("user.dir");
         optBuilder.result(userDir + "/data/output.json");
+        System.out.println("result dir: " + userDir + "/data/output.json");
         optBuilder.resultFormat(ResultFormatType.JSON);
         return optBuilder;
     }
