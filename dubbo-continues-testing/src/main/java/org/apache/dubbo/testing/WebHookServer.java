@@ -132,6 +132,9 @@ public class WebHookServer {
 
             File outputFile = new File(userDir + "/dubbo-continues-testing-demo/data/output.json");
             // transfer file to Json
+            if (!outputFile.exists()) {
+                throw new RuntimeException("output file not exists");
+            }
             String json;
             try {
                 json = FileUtils.readFileToString(outputFile, StandardCharsets.UTF_8);
