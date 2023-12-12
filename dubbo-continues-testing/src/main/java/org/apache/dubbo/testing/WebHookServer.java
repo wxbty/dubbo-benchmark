@@ -34,7 +34,9 @@ public class WebHookServer {
     static String USR = "sa";
     static String PSD = "666666";
     static String owner = "wxbty";
-    static String repo = "jmh_demo";
+    static String repo = "dubbo";
+
+    static String branch = "ct_test";
 
     public static void main(String[] args) {
         try {
@@ -57,13 +59,13 @@ public class WebHookServer {
 
         httpServer.createContext("/merge/notify", httpExchange -> {
 
-            String apiUrl = "https://api.github.com/repos/" + owner + "/" + repo + "/commits/master";
+            String apiUrl = "https://api.github.com/repos/" + owner + "/" + repo + "/commits/" + branch;
             System.out.println(apiUrl);
             String latestCommitId = httpExchange.getRequestHeaders().getFirst("latestCommitId");
             if (latestCommitId == null) {
                 latestCommitId = getLatestCommitId(apiUrl);
             }
-            String pomUrl = "https://raw.githubusercontent.com/" + owner + "/" + repo + "/master/pom.xml";
+            String pomUrl = "https://raw.githubusercontent.com/" + owner + "/" + repo + "/" + branch + "/pom.xml";
             System.out.println(pomUrl);
             String version = httpExchange.getRequestHeaders().getFirst("version");
             if (version == null) {
@@ -107,6 +109,7 @@ public class WebHookServer {
 
                     while (process.isAlive() && (lineStr = br.readLine()) != null) {
                         result.append(lineStr);
+                        System.out.println(lineStr);
                         result.append("\n");
                     }
                     System.out.println("============result begin============");
