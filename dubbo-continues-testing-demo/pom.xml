@@ -24,12 +24,6 @@
         </dependency>
 
         <dependency>
-            <artifactId>jmh_demo</artifactId>
-            <groupId>site.zfei</groupId>
-            <version>${siteVersion}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-generator-annprocess</artifactId>
         </dependency>
