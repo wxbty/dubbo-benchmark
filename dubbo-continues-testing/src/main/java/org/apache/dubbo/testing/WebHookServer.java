@@ -66,7 +66,7 @@ public class WebHookServer {
                 version = currentVersion;
             }
 
-            URL resource = WebHookServer.class.getClassLoader().getResource("installNewest.sh");
+            URL resource = WebHookServer.class.getClassLoader().getResource("InstallNewest.sh");
             String userDir = System.getProperty("user.dir");
 
             if (resource != null) {
@@ -111,6 +111,8 @@ public class WebHookServer {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
+            } else {
+                System.out.println("resource is null");
             }
 
             System.out.println("process end");
