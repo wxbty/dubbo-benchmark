@@ -21,7 +21,6 @@
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
-            <version>1.37</version>
         </dependency>
 
         <dependency>
@@ -33,7 +32,6 @@
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-generator-annprocess</artifactId>
-            <version>1.37</version>
         </dependency>
 
         <dependency>
@@ -79,7 +77,7 @@
                                     <resource>reference.conf</resource>
                                 </transformer>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.apache.dubbo.testing.demo.Stater</mainClass>
+                                    <mainClass>org.apache.dubbo.testing.demo.Client</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

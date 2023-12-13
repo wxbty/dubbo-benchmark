@@ -4,6 +4,7 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpServer;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.model.Model;
@@ -14,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -71,7 +73,6 @@ public class WebHookServer {
             if (version == null) {
                 version = getPomVersion(pomUrl);
             }
-            // exec installNewVersion.sh under resources in the current project root directory
             URL resource = WebHookServer.class.getClassLoader().getResource("installNewest.sh");
             String userDir = System.getProperty("user.dir");
 
@@ -80,7 +81,8 @@ public class WebHookServer {
                 System.out.println("Script Path: " + scriptPath);
 
                 System.out.println("User Dir: " + userDir);
-                ProcessBuilder processBuilder = new ProcessBuilder(scriptPath, userDir, version);
+                String username = System.getProperty("user.name");
+                ProcessBuilder processBuilder = new ProcessBuilder("sudo", "-u", username, "sh", scriptPath, userDir, version);
                 Process process;
                 try {
                     process = processBuilder.start();
@@ -89,14 +91,7 @@ public class WebHookServer {
                     throw new RuntimeException(e);
                 }
 
-//                BufferedInputStream errIn = new BufferedInputStream(process.getErrorStream());
-//                BufferedReader errBr = new BufferedReader(new InputStreamReader(errIn));
                 String lineStr;
-//                while ((lineStr = errBr.readLine()) != null) {
-//                    System.out.println("error:" + lineStr);
-//                }
-
-//                StringBuilder result = new StringBuilder();
                 BufferedInputStream in = null;
                 BufferedReader br = null;
 
@@ -169,6 +164,31 @@ public class WebHookServer {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+            byte[] respContents = "ok".getBytes(StandardCharsets.UTF_8);
+            httpExchange.getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
+            httpExchange.sendResponseHeaders(200, respContents.length);
+            httpExchange.getResponseBody().write(respContents);
+            httpExchange.close();
+        });
+
+        httpServer.createContext("/dubbo/notify", httpExchange -> {
+
+            System.out.println("invoke dubbo/notify ");
+            Headers requestHeaders = httpExchange.getRequestHeaders();
+            // print all request headers
+            System.out.println("requestHeaders:");
+            requestHeaders.entrySet().forEach(System.out::println);
+            InputStream stream = httpExchange.getRequestBody();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+            reader.close();
+            System.out.println("response:" + response);
+
+
             byte[] respContents = "ok".getBytes(StandardCharsets.UTF_8);
             httpExchange.getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
             httpExchange.sendResponseHeaders(200, respContents.length);

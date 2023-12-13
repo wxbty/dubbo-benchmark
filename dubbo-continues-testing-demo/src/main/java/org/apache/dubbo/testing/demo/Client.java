@@ -26,9 +26,10 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+@BenchmarkMode({Mode.AverageTime})
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
 @State(Scope.Benchmark)
 public class Client extends AbstractClient {
     private static final int CONCURRENCY = 32;
@@ -56,32 +57,24 @@ public class Client extends AbstractClient {
     }
 
     @Benchmark
-    @BenchmarkMode({Mode.Throughput, Mode.AverageTime, Mode.SampleTime})
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Override
     public boolean existUser() throws Exception {
         return super.existUser();
     }
 
     @Benchmark
-    @BenchmarkMode({Mode.Throughput, Mode.AverageTime, Mode.SampleTime})
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Override
     public boolean createUser() throws Exception {
         return super.createUser();
     }
 
     @Benchmark
-    @BenchmarkMode({Mode.Throughput, Mode.AverageTime, Mode.SampleTime})
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Override
     public User getUser() throws Exception {
         return super.getUser();
     }
 
     @Benchmark
-    @BenchmarkMode({Mode.Throughput, Mode.AverageTime, Mode.SampleTime})
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Override
     public Page<User> listUser() throws Exception {
         return super.listUser();
