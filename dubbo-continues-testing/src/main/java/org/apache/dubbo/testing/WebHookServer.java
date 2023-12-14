@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,12 +71,21 @@ public class WebHookServer {
             String userDir = System.getProperty("user.dir");
 
             if (resource != null) {
-                String scriptPath = resource.getPath();
-                System.out.println("Script Path: " + scriptPath);
+                InputStream is = resource.openStream();
+                byte[] buffer = new byte[1024];
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                int bytesRead;
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    baos.write(buffer, 0, bytesRead);
+                }
+                String script = baos.toString("UTF-8");
 
+                System.out.println("script: " + script);
+
+                // 使用ProcessBuilder执行脚本
                 System.out.println("User Dir: " + userDir);
                 String username = System.getProperty("user.name");
-                ProcessBuilder processBuilder = new ProcessBuilder("sudo", "-u", username, "sh", scriptPath, userDir, version);
+                ProcessBuilder processBuilder = new ProcessBuilder("sudo", "-u", username,"sh", "-c", script, userDir, version);
                 Process process;
                 try {
                     process = processBuilder.start();
