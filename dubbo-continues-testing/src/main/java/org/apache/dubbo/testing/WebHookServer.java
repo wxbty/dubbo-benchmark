@@ -68,7 +68,6 @@ public class WebHookServer {
             }
 
             URL resource = WebHookServer.class.getClassLoader().getResource("InstallNewest.sh");
-            String userDir = System.getProperty("user.dir");
 
             if (resource != null) {
                 InputStream is = resource.openStream();
@@ -83,9 +82,8 @@ public class WebHookServer {
                 System.out.println("script: " + script);
 
                 // 使用ProcessBuilder执行脚本
-                System.out.println("User Dir: " + userDir);
                 String username = System.getProperty("user.name");
-                ProcessBuilder processBuilder = new ProcessBuilder("sudo", "-u", username,"sh", "-c", script, userDir, version);
+                ProcessBuilder processBuilder = new ProcessBuilder("sudo", "-u", username,"sh", "-c", script, version);
                 Process process;
                 try {
                     process = processBuilder.start();
@@ -127,7 +125,7 @@ public class WebHookServer {
 
             System.out.println("process end");
 
-            File outputFile = new File(userDir + "/dubbo-continues-testing-demo/data/output.json");
+            File outputFile = new File("~/work/dubbo-benchmark/dubbo-continues-testing-demo/data/output.json");
             // transfer file to Json
             if (!outputFile.exists()) {
                 throw new RuntimeException("output file not exists");
