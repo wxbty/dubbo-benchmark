@@ -5,7 +5,8 @@
 echo aaaa
 cd ~/work/dubbo
 git pull
-su -u $(whoami) mvn clean install -Drevision=$2 -Dmaven.test.skip=true --settings ~/work/settings.xml
+#sudo -u $(whoami) mvn clean install -Drevision=$2 -Dmaven.test.skip=true --settings ~/work/settings.xml
+mvn clean install -Drevision=$2 -Dmaven.test.skip=true --settings ~/work/settings.xml
 
 cd ~/work/dubbo-benchmark/dubbo-continues-testing-demo
 mvn clean install -Drevision=$2  --settings ~/work/settings.xml
