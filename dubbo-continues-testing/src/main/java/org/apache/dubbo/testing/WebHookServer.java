@@ -128,6 +128,7 @@ public class WebHookServer {
             File outputFile = new File("~/work/dubbo-benchmark/dubbo-continues-testing-demo/data/output.json");
             // transfer file to Json
             if (!outputFile.exists()) {
+                System.out.println("outputFile not exist");
                 throw new RuntimeException("output file not exists");
             }
             String json;
@@ -136,6 +137,8 @@ public class WebHookServer {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+
+            System.out.println("convert to json success");
 
             json = json.replace("currentCommitId", latestCommitId);
 
@@ -147,6 +150,8 @@ public class WebHookServer {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+
+            System.out.println("insert json to db success");
 
             mergeJson();
 
