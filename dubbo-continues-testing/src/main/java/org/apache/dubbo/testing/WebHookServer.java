@@ -125,7 +125,7 @@ public class WebHookServer {
 
             System.out.println("process end");
 
-            File outputFile = new File("~/work/dubbo-benchmark/dubbo-continues-testing-demo/data/output.json");
+            File outputFile = new File("/root/work/dubbo-benchmark/dubbo-continues-testing-demo/data/output.json");
             // transfer file to Json
             if (!outputFile.exists()) {
                 System.out.println("outputFile not exist");
