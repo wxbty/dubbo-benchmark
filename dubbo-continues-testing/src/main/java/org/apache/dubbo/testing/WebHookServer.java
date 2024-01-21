@@ -1,21 +1,19 @@
 package org.apache.dubbo.testing;
 
-import cn.hutool.http.HttpUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.sun.net.httpserver.HttpServer;
 import org.apache.commons.io.FileUtils;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +24,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class WebHookServer {
@@ -33,8 +33,8 @@ public class WebHookServer {
     static String URL = "jdbc:h2:file:~/h2/test";
     static String USR = "sa";
     static String PSD = "666666";
-    static String owner = "wxbty";
-    static String repo = "jmh_demo";
+
+    static String currentVersion = "3.3.0-beta.2-SNAPSHOT";
 
     public static void main(String[] args) {
         try {
@@ -55,30 +55,35 @@ public class WebHookServer {
             throw new RuntimeException(e);
         }
 
-        httpServer.createContext("/merge/notify", httpExchange -> {
+        httpServer.createContext("/dubbo/notify", httpExchange -> {
 
-            String apiUrl = "https://api.github.com/repos/" + owner + "/" + repo + "/commits/master";
-            System.out.println(apiUrl);
-            String latestCommitId = httpExchange.getRequestHeaders().getFirst("latestCommitId");
-            if (latestCommitId == null) {
-                latestCommitId = getLatestCommitId(apiUrl);
-            }
-            String pomUrl = "https://raw.githubusercontent.com/" + owner + "/" + repo + "/master/pom.xml";
-            System.out.println(pomUrl);
-            String version = httpExchange.getRequestHeaders().getFirst("version");
+            InputStream stream = httpExchange.getRequestBody();
+            String body = IoUtil.read(stream, StandardCharsets.UTF_8);
+            JSONObject jsonObject = JSONUtil.parseObj(body);
+            String latestCommitId = jsonObject.getStr("after");
+            String xmlUrl = "https://gitee.com/apache/dubbo/raw/3.3/pom.xml";
+            String version = getCurrentVersion(xmlUrl);
             if (version == null) {
-                version = getPomVersion(pomUrl);
+                version = currentVersion;
             }
-            // exec installNewVersion.sh under resources in the current project root directory
-            URL resource = WebHookServer.class.getClassLoader().getResource("installNewest.sh");
-            String userDir = System.getProperty("user.dir");
+
+            URL resource = WebHookServer.class.getClassLoader().getResource("InstallNewest.sh");
 
             if (resource != null) {
-                String scriptPath = resource.getPath();
-                System.out.println("Script Path: " + scriptPath);
+                InputStream is = resource.openStream();
+                byte[] buffer = new byte[1024];
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                int bytesRead;
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    baos.write(buffer, 0, bytesRead);
+                }
+                String script = baos.toString("UTF-8");
 
-                System.out.println("User Dir: " + userDir);
-                ProcessBuilder processBuilder = new ProcessBuilder(scriptPath, userDir, version);
+                System.out.println("script: " + script);
+
+                // 使用ProcessBuilder执行脚本
+                String username = System.getProperty("user.name");
+                ProcessBuilder processBuilder = new ProcessBuilder("sudo", "-u", username,"sh", "-c", script, version);
                 Process process;
                 try {
                     process = processBuilder.start();
@@ -87,14 +92,7 @@ public class WebHookServer {
                     throw new RuntimeException(e);
                 }
 
-//                BufferedInputStream errIn = new BufferedInputStream(process.getErrorStream());
-//                BufferedReader errBr = new BufferedReader(new InputStreamReader(errIn));
                 String lineStr;
-//                while ((lineStr = errBr.readLine()) != null) {
-//                    System.out.println("error:" + lineStr);
-//                }
-
-                StringBuilder result = new StringBuilder();
                 BufferedInputStream in = null;
                 BufferedReader br = null;
 
@@ -104,11 +102,11 @@ public class WebHookServer {
                     // 字符流转换字节流
                     br = new BufferedReader(new InputStreamReader(in));
                     // 这里也可以输出文本日志
-
+                    System.out.println("============result begin============");
                     while (process.isAlive() && (lineStr = br.readLine()) != null) {
-                        result.append(lineStr);
+                        System.out.println(lineStr);
                     }
-                    System.out.println("==============================" + result);
+                    System.out.println("============result end============");
                 } finally {
                     // 关闭输入流
                     br.close();
@@ -121,16 +119,26 @@ public class WebHookServer {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
+            } else {
+                System.out.println("resource is null");
             }
 
-            File outputFile = new File(userDir + "/dubbo-continues-testing-demo/data/output.json");
+            System.out.println("process end");
+
+            File outputFile = new File("/root/work/dubbo-benchmark/dubbo-continues-testing-demo/data/output.json");
             // transfer file to Json
+            if (!outputFile.exists()) {
+                System.out.println("outputFile not exist");
+                throw new RuntimeException("output file not exists");
+            }
             String json;
             try {
                 json = FileUtils.readFileToString(outputFile, StandardCharsets.UTF_8);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+
+            System.out.println("convert to json success");
 
             json = json.replace("currentCommitId", latestCommitId);
 
@@ -142,6 +150,8 @@ public class WebHookServer {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+
+            System.out.println("insert json to db success");
 
             mergeJson();
 
@@ -169,49 +179,6 @@ public class WebHookServer {
         httpServer.start();
 
         System.out.println("WebHookServer started");
-    }
-
-    public static String getLatestCommitId(String apiUrl) {
-
-        try {
-            URL url = new URL(apiUrl);
-
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Accept", "application/json");
-
-            if (connection.getResponseCode() == 200) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-                reader.close();
-                return response.toString().split("\"sha\":\"")[1].split("\"")[0];
-            } else {
-                System.out.println(apiUrl);
-                System.out.println("Failed to fetch data from GitHub API: " + connection.getResponseCode());
-                throw new RuntimeException("Failed to fetch data from GitHub API: " + connection.getResponseCode());
-            }
-        } catch (IOException e) {
-            System.out.println("Failed to fetch data from GitHub API: " + e.getMessage());
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    public static String getPomVersion(String pomUrl) {
-
-        String text = HttpUtil.get(pomUrl);
-        MavenXpp3Reader reader = new MavenXpp3Reader();
-        Model model;
-        try {
-            model = reader.read(new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8)));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return model.getVersion(); // Assuming version is in the <version> tag of the pom.xml
     }
 
     public static void mergeJson() {
@@ -243,6 +210,38 @@ public class WebHookServer {
             list.addAll(array.toList(JSONObject.class));
         }
         return list;
+    }
+
+    public static String getCurrentVersion(String xmlUrl) {
+
+
+        // 下载XML文件
+        try {
+            // 获取 HTML 内容
+            URL url = new URL(xmlUrl);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+            StringBuilder stringBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+            reader.close();
+            String htmlContent = stringBuilder.toString();
+
+            // 使用正则表达式提取 <revision> 标签中的内容
+            Pattern pattern = Pattern.compile("<revision>(.*?)</revision>");
+            Matcher matcher = pattern.matcher(htmlContent);
+
+            // 遍历匹配结果并输出版本号
+            while (matcher.find()) {
+                String revisionValue = matcher.group(1);
+                return revisionValue;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 

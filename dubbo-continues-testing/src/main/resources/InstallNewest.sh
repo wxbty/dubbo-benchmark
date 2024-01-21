@@ -2,12 +2,12 @@
 
 # $1: the path of dubbo-continues-testing
 # $2: the version of dubbo-continues-testing
-
-cd $1/../jmh_demo
+cd ~/work/dubbo
 git pull
-mvn clean install
+#sudo -u $(whoami) mvn clean install -Drevision=$2 -Dmaven.test.skip=true --settings ~/work/settings.xml
+mvn clean install -Drevision=$1 -Dmaven.test.skip=true --settings ~/work/settings.xml
 
-cd $1/dubbo-continues-testing-demo
-mvn clean install -DsiteVersion=$2
-java -jar $1/dubbo-continues-testing-demo/target/testing-demo.jar
+cd ~/work/dubbo-benchmark/dubbo-continues-testing-demo
+mvn clean install -Drevision=$1  --settings ~/work/settings.xml
+java -jar ~/work/dubbo-benchmark/dubbo-continues-testing-demo/target/testing-demo.jar
 
