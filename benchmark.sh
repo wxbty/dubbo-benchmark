@@ -12,7 +12,7 @@ usage() {
 }
 
 build() {
-    mvn --projects benchmark-base,client-base,server-base,${PROJECT_DIR} clean package -Dos.detected.classifier=osx-x86_64 --settings /Users/zcy/Documents/work/tool/apache-maven-3.8.5/settings.xml
+    mvn --projects benchmark-base,client-base,server-base,${PROJECT_DIR} clean package
 }
 
 java_options() {
@@ -31,7 +31,7 @@ run() {
         JAR=`find ${PROJECT_DIR}/target/*.jar | head -n 1`
         echo
         echo "RUN ${PROJECT_DIR} IN ${MODE:-benchmark} MODE"
-        CMD="java ${JAVA_OPTIONS} -Dserver.host=${SERVER} -Dserver.port=${PORT} -Dbenchmark.output=output -Ddubbo.qos.port=33333  -jar ${JAR} ${OTHERARGS}"
+        CMD="java ${JAVA_OPTIONS} -Dserver.host=${SERVER} -Dserver.port=${PORT} -Dbenchmark.output=${OUTPUT} -jar ${JAR} ${OTHERARGS}"
         echo "command is: ${CMD}"
         echo
         ${CMD}
